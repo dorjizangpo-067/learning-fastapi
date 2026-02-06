@@ -1,6 +1,8 @@
-def main():
-    print("Hello from fastapi-learning!")
+from fastapi import FastAPI
+
+app = FastAPI()
 
 
-if __name__ == "__main__":
-    main()
+@app.get("/")
+def read_root() -> dict:
+    return {"message": "Hello, world"}
