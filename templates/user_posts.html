@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% block content %}
+<h1 class="mb-4">Posts by {{ user.username }}</h1>
 {% for post in posts %}
 <article class="content-section py-3 px-4 mb-4">
     <div class="d-flex align-items-start gap-4">
@@ -18,5 +19,7 @@
         </div>
     </div>
 </article>
+{% else %}
+<p class="text-body-secondary">No posts by this user yet.</p>
 {% endfor %}
 {% endblock content %}
