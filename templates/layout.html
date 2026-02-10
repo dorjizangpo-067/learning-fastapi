@@ -76,6 +76,10 @@
                     </div>
                     <!-- Navbar Right Side -->
                     <div class="navbar-nav">
+                        <!-- NOTE: Once auth is set up, this button will only be visible when logged in -->
+                        <button class="btn btn-outline-light mb-2 mb-md-0 me-md-2" type="button" data-bs-toggle="modal"
+                            data-bs-target="#createPostModal">New Post</button>
+                        <!-- NOTE: Once auth is set up, this button will only be visible when logged in -->
                         <a class="btn btn-outline-light mb-2 mb-md-0 me-md-2" href="#">Login</a>
                         <a class="btn btn-light mb-2 mb-md-0 me-md-3" href="#">Register</a>
                         <div class="nav-item dropdown">
@@ -133,6 +137,70 @@
         </div>
     </footer>
 
+    <!-- Create Post Modal -->
+    <div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createPostModalLabel">New Post</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="createPostForm">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="title" name="title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="content" class="form-label">Content</label>
+                            <textarea class="form-control" id="content" name="content" rows="5" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Post</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="successModalLabel">Success</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="successMessage" class="fs-5"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Error Modal -->
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="errorMessage" class="fs-5"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Set the current year in the footer -->
     <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
 
@@ -165,6 +233,76 @@
         // Initialize
         setTheme(localStorage.getItem('theme') || 'auto');
     </script>
+    <!-- Create Post Form Handler -->
+    <script type="module">
+        import {
+            getErrorMessage,
+            hideModal,
+            showModal,
+        } from "/static/js/utils.js";
+
+        const createForm = document.getElementById("createPostForm");
+
+        createForm.addEventListener("submit", async (event) => {
+            // Stop default form submission - we'll handle it with JavaScript
+            event.preventDefault();
+
+            // Gather form values into a plain object {title: "...", content: "..."}
+            const formData = new FormData(createForm);
+            const postData = Object.fromEntries(formData.entries());
+
+            // TEMPORARY - hardcoded until authorization (Tutorial 11)
+            postData.user_id = 1;
+
+            try {
+                // POST to our API as JSON
+                const response = await fetch("/api/posts", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(postData),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById("successMessage").textContent =
+                        `Post "${data.title}" created successfully!`;
+
+                    hideModal("createPostModal");
+                    showModal("successModal");
+
+                    // Clear form
+                    createForm.reset();
+
+                    // Reload page after modal is hidden to show new post
+                    document
+                        .getElementById("successModal")
+                        .addEventListener(
+                            "hidden.bs.modal",
+                            () => {
+                                window.location.reload();
+                            },
+                            { once: true },
+                        );
+                } else {
+                    const error = await response.json();
+                    document.getElementById("errorMessage").textContent =
+                        getErrorMessage(error);
+
+                    hideModal("createPostModal");
+                    showModal("errorModal");
+                }
+            } catch (error) {
+                document.getElementById("errorMessage").textContent =
+                    "Network error. Please check your connection and try again.";
+                showModal("errorModal");
+            }
+        });
+    </script>
+
+    {% block scripts %}
+    {% endblock scripts %}
 </body>
 
 </html>
