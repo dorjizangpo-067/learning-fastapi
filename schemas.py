@@ -9,7 +9,7 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
-    pass
+    password: str = Field(..., min_length=8)
 
 
 class UserUpdate(BaseModel):
@@ -18,17 +18,27 @@ class UserUpdate(BaseModel):
     image_file: str | None = Field(default=None)
 
 
-class UserResponse(UserBase):
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class UserPublic(BaseModel):
     id: int
+    username: str
     image_file: str | None = None
     image_path: str
 
     model_config = ConfigDict(from_attributes=True)
 
 
+class UserPrivate(UserPublic):
+    email: EmailStr
+
+
 class PostBase(BaseModel):
     title: str = Field(..., max_length=100)
-    content: str = Field(..., min_length=50)
+    content: str = Field(..., max_length=50)
 
 
 class PostCreate(PostBase):
@@ -37,13 +47,13 @@ class PostCreate(PostBase):
 
 class PostUpdate(BaseModel):
     title: str | None = Field(default=None, max_length=100)
-    content: str | None = Field(default=None, min_length=50)
+    content: str | None = Field(default=None, max_length=50)
 
 
 class PostResponse(PostBase):
     id: int
     user_id: int
     date_posted: datetime
-    author: UserResponse
+    author: UserPublic
 
     model_config = ConfigDict(from_attributes=True)
