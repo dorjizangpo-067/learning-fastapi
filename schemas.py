@@ -36,8 +36,8 @@ class UserPrivate(UserPublic):
 
 
 class PostBase(BaseModel):
-    title: str = Field(..., max_length=100)
-    content: str = Field(..., max_length=50)
+    title: str
+    content: str
 
 
 class PostCreate(PostBase):
@@ -56,3 +56,12 @@ class PostResponse(PostBase):
     author: UserPublic
 
     model_config = ConfigDict(from_attributes=True)
+
+
+## Paginated Post Response Schema
+class PaginatedPostsResponse(BaseModel):
+    posts: list[PostResponse]
+    total: int
+    skip: int
+    limit: int
+    has_more: bool

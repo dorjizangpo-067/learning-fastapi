@@ -11,3 +11,5 @@ wheels/
 *.db
 *.env
 media/*
+populate_db.py
+populate_images/

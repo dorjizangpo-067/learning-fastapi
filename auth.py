@@ -3,6 +3,7 @@ from typing import Annotated
 
 import jwt
 from fastapi import Depends, HTTPException, status
+
 from fastapi.security import OAuth2PasswordBearer
 from pwdlib import PasswordHash
 from sqlalchemy import select
